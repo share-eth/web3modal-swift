@@ -59,6 +59,7 @@ public class Web3ModalClient {
     }
     
     public var coinbaseResponseSubject = PassthroughSubject<W3MResponse, Never>()
+    public var coinbaseConnectedSubject = PassthroughSubject<Void, Never>()
     
     /// Publisher that sends web socket connection status
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
@@ -294,6 +295,10 @@ public class Web3ModalClient {
     /// - Note: Will unsubscribe from all topics
     public func cleanup() async throws {
         do {
+            store.session = nil
+            store.account = nil
+            store.balance = nil
+            store.identity = nil
             try await signClient.cleanup()
         } catch {
             Web3Modal.config.onError(error)
