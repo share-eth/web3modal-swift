@@ -319,7 +319,7 @@ public class Web3ModalClient {
     /// - Note: Will unsubscribe from all topics
     public func cleanup() async throws {
         do {
-            Task { @MainActor in
+            await Task { @MainActor in
                 self.store.session = nil
                 self.store.account = nil
                 self.store.balance = nil
