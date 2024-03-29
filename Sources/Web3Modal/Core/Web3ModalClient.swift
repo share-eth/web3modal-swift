@@ -294,22 +294,16 @@ public class Web3ModalClient {
     ///
     /// - Note: Will unsubscribe from all topics
     public func cleanup() async throws {
+        defer {
+            DispatchQueue.main.async {
+                self.store.session = nil
+                self.store.account = nil
+            }
+        }
         do {
             try await signClient.cleanup()
-            await Task { @MainActor in
-                self.store.session = nil
-                self.store.account = nil
-                self.store.balance = nil
-                self.store.identity = nil
-            }.value
         } catch {
             Web3Modal.config.onError(error)
-            await Task { @MainActor in
-                self.store.session = nil
-                self.store.account = nil
-                self.store.balance = nil
-                self.store.identity = nil
-            }.value
             throw error
         }
     }
