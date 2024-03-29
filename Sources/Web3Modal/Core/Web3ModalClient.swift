@@ -319,13 +319,13 @@ public class Web3ModalClient {
     /// - Note: Will unsubscribe from all topics
     public func cleanup() async throws {
         do {
+            try await signClient.cleanup()
             await Task { @MainActor in
                 self.store.session = nil
                 self.store.account = nil
                 self.store.balance = nil
                 self.store.identity = nil
             }.value
-            try await signClient.cleanup()
         } catch {
             Web3Modal.config.onError(error)
             throw error
