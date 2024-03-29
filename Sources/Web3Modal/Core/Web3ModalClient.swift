@@ -304,6 +304,12 @@ public class Web3ModalClient {
             }.value
         } catch {
             Web3Modal.config.onError(error)
+            await Task { @MainActor in
+                self.store.session = nil
+                self.store.account = nil
+                self.store.balance = nil
+                self.store.identity = nil
+            }.value
             throw error
         }
     }
