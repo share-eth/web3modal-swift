@@ -64,7 +64,10 @@ struct ConnectWalletView: View {
                 Button(action: {
                     Task {
                         do {
-                            try await signInteractor.createPairingAndConnect()
+                            // Make this optional so we don't need to connect to the socket because
+                            // Phantom wallet and Coinbase SDKs use universal links
+                            try? await signInteractor.createPairingAndConnect()
+                            
                             router.setRoute(Router.ConnectingSubpage.walletDetail(wallet))
                             analyticsService.track(.SELECT_WALLET(name: wallet.name, platform: .mobile))
                         } catch {
