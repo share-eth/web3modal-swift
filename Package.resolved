@@ -1,6 +1,15 @@
 {
-  "originHash" : "56f8751b4a2521af0506ea135e55db03c7e490f1e26ffd293f3700d07af256b6",
+  "originHash" : "13cb6470a1da3468f7d91feff9629905a12e045088ddd775f7ecaeee88128b18",
   "pins" : [
+    {
+      "identity" : "phantom-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/share-eth/phantom-swift",
+      "state" : {
+        "branch" : "main",
+        "revision" : "79e7545dabceb6ae40e8d8c7221b278d21fe9359"
+      }
+    },
     {
       "identity" : "qrcode",
       "kind" : "remoteSourceControl",
