@@ -1,4 +1,5 @@
 {
+  "originHash" : "5004d27053cfd244389693b4c9a9e014e1ae11145ba5ea42814e2fe980120328",
   "pins" : [
     {
       "identity" : "atlantis",
@@ -82,15 +83,6 @@
       }
     },
     {
-      "identity" : "swift-snapshot-testing",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
-      "state" : {
-        "revision" : "f29e2014f6230cf7d5138fc899da51c7f513d467",
-        "version" : "1.10.0"
-      }
-    },
-    {
       "identity" : "swiftimagereadwrite",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/dagronf/SwiftImageReadWrite",
@@ -136,5 +128,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

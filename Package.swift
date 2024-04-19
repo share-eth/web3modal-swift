@@ -1,4 +1,4 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "swift-web3modal",
     platforms: [
-        .iOS(.v13),
+        .iOS(.v17),
     ],
     products: [
         .library(
@@ -32,6 +32,7 @@ let package = Package(
             .upToNextMinor(from: "1.10.0")
         ),
         .package(name: "CoinbaseWalletSDK", url: "https://github.com/WalletConnect/wallet-mobile-sdk", from: "1.0.0"),
+        .package(url: "https://github.com/share-eth/phantom-swift", branch: "main")
     ],
     targets: [
         .target(
@@ -44,7 +45,8 @@ let package = Package(
                 ),
                 "Web3ModalUI",
                 "Web3ModalBackport",
-                "CoinbaseWalletSDK"
+                "CoinbaseWalletSDK",
+                "phantom-swift",
             ],
             resources: [
                 .process("Resources/Assets.xcassets"),

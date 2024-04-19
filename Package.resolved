@@ -1,4 +1,5 @@
 {
+  "originHash" : "56f8751b4a2521af0506ea135e55db03c7e490f1e26ffd293f3700d07af256b6",
   "pins" : [
     {
       "identity" : "qrcode",
@@ -23,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
       "state" : {
-        "revision" : "dc46eeb3928a75390651fac6c1ef7f93ad59a73b",
-        "version" : "1.11.1"
+        "revision" : "f29e2014f6230cf7d5138fc899da51c7f513d467",
+        "version" : "1.10.0"
       }
     },
     {
@@ -37,12 +38,21 @@
       }
     },
     {
+      "identity" : "tweetnacl-swiftwrap",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bitmark-inc/tweetnacl-swiftwrap.git",
+      "state" : {
+        "revision" : "f8fd111642bf2336b11ef9ea828510693106e954",
+        "version" : "1.1.0"
+      }
+    },
+    {
       "identity" : "wallet-mobile-sdk",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/coinbase/wallet-mobile-sdk.git",
+      "location" : "https://github.com/WalletConnect/wallet-mobile-sdk",
       "state" : {
-        "revision" : "4aa89e682f8d7ab1515d85d0797f0d25306bb56a",
-        "version" : "1.0.5"
+        "revision" : "b6dfb7d6b8447c7c5b238a10443a1ac28223f38f",
+        "version" : "1.0.0"
       }
     },
     {
@@ -55,5 +65,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
