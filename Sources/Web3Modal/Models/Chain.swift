@@ -63,6 +63,8 @@ enum EthUtils {
 }
 
 enum ChainPresets {
+    static var allChains: [Chain] = ethChains + solChains
+    
     static let ethToken = Chain.Token(name: "Ether", symbol: "ETH", decimal: 18)
 
     static var ethChains: [Chain] = [
@@ -210,5 +212,23 @@ enum ChainPresets {
             blockExplorerUrl: "https://aurorascan.dev",
             imageId: "3ff73439-a619-4894-9262-4470c773a100"
         )
+    ]
+    
+    
+    static let solToken = Chain.Token(name: "Solana", symbol: "SOL", decimal: 18)
+    
+    static var solChains: [Chain] = [
+        Chain(
+            chainName: "Solana",
+            chainNamespace: "solana",
+            chainReference: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            requiredMethods: [],
+            optionalMethods: [],
+            events: [],
+            token: solToken,
+            rpcUrl: "https://api.mainnet-beta.solana.com",
+            blockExplorerUrl: "https://explorer.solana.com/",
+            imageId: "" // TODO: Find it
+        ),
     ]
 }

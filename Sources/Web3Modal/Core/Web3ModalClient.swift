@@ -353,7 +353,7 @@ public class Web3ModalClient {
     }
     
     public func addChainPreset(_ chain: Chain) {
-        ChainPresets.ethChains.append(chain)
+        ChainPresets.allChains.append(chain)
     }
     
     public func selectChain(_ chain: Chain) {

@@ -36,7 +36,7 @@ final class NetworkDetailViewModel: ObservableObject {
                         return
                     }
                     
-                    self.store.selectedChain = ChainPresets.ethChains.first(where: { $0.chainReference == String(chainReference) })
+                    self.store.selectedChain = ChainPresets.allChains.first(where: { $0.chainReference == String(chainReference) })
                     self.router.setRoute(Router.AccountSubpage.profile)
                     
                 case "accountsChanged":
@@ -47,7 +47,7 @@ final class NetworkDetailViewModel: ObservableObject {
                     
                     let chainReference = account[0].split(separator: ":")[1]
                     
-                    self.store.selectedChain = ChainPresets.ethChains.first(where: { $0.chainReference == String(chainReference) })
+                    self.store.selectedChain = ChainPresets.allChains.first(where: { $0.chainReference == String(chainReference) })
                     self.router.setRoute(Router.AccountSubpage.profile)
                 default:
                     break

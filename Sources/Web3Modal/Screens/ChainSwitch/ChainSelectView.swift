@@ -40,13 +40,13 @@ struct ChainSelectView: View {
     private func grid() -> some View {
         let numberOfColumns = calculateNumberOfColumns()
         let columns = Array(repeating: GridItem(.flexible()), count: numberOfColumns)
-        let maxNumberOfRows = ceil(Double(ChainPresets.ethChains.count) / Double(numberOfColumns))
+        let maxNumberOfRows = ceil(Double(ChainPresets.allChains.count) / Double(numberOfColumns))
         let numberOfRows = min(4, maxNumberOfRows)
 
         VStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: Spacing.l) {
-                    ForEach(ChainPresets.ethChains, id: \.self) { chain in
+                    ForEach(ChainPresets.allChains, id: \.self) { chain in
                         gridElement(for: chain)
                     }
                 }
