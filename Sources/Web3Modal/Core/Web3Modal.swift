@@ -203,7 +203,7 @@ public class Web3Modal {
                             }
                             Web3Modal.viewModel.router.setRoute(Router.AccountSubpage.profile)
                             
-                            let matchingChain = ChainPresets.ethChains.first(where: {
+                            let matchingChain = ChainPresets.allChains.first(where: {
                                 $0.chainNamespace == blockchain.namespace && $0.chainReference == blockchain.reference
                             })
                         
