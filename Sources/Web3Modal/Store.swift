@@ -20,7 +20,7 @@ class Store: ObservableObject {
     @Published var connecting: Bool = false
     @Published var account: W3MAccount? {
         didSet {
-            let matchingChain = ChainPresets.ethChains.first(where: {
+            let matchingChain = ChainPresets.allChains.first(where: {
                 $0.chainNamespace == account?.chain.namespace && $0.chainReference == account?.chain.reference
             })
             
@@ -34,7 +34,7 @@ class Store: ObservableObject {
     @Published var session: Session? {
         didSet {
             if let blockchain = session?.accounts.first?.blockchain {
-                let matchingChain = ChainPresets.ethChains.first(where: {
+                let matchingChain = ChainPresets.allChains.first(where: {
                     $0.chainNamespace == blockchain.namespace && $0.chainReference == blockchain.reference
                 })
                 

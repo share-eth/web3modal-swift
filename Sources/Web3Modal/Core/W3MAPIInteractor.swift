@@ -189,7 +189,7 @@ final class W3MAPIInteractor: ObservableObject {
     func prefetchChainImages() async throws {
         var chainImages: [String: UIImage] = [:]
         
-        try await ChainPresets.ethChains.concurrentMap { chain in
+        try await ChainPresets.allChains.concurrentMap { chain in
             do {
                 let image = try await self.fetchAssetImage(id: chain.imageId)
                 return (chain.imageId, image)

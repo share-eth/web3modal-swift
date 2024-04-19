@@ -32,7 +32,7 @@ class Web3ModalViewModel: ObservableObject {
                         return
                     }
 
-                    Store.shared.selectedChain = ChainPresets.ethChains.first(where: { $0.chainReference == String(chainReference) })
+                    Store.shared.selectedChain = ChainPresets.allChains.first(where: { $0.chainReference == String(chainReference) })
 
                 case "accountsChanged":
 
@@ -42,7 +42,7 @@ class Web3ModalViewModel: ObservableObject {
 
                     let chainReference = account[0].split(separator: ":")[1]
 
-                    Store.shared.selectedChain = ChainPresets.ethChains.first(where: { $0.chainReference == String(chainReference) })
+                    Store.shared.selectedChain = ChainPresets.allChains.first(where: { $0.chainReference == String(chainReference) })
                 default:
                     break
                 }
@@ -59,7 +59,7 @@ class Web3ModalViewModel: ObservableObject {
                 
                 if
                     let blockchain = session.accounts.first?.blockchain,
-                    let matchingChain = ChainPresets.ethChains.first(where: { $0.chainNamespace == blockchain.namespace && $0.chainReference == blockchain.reference })
+                    let matchingChain = ChainPresets.allChains.first(where: { $0.chainNamespace == blockchain.namespace && $0.chainReference == blockchain.reference })
                 {
                     store.selectedChain = matchingChain
                 }
@@ -150,7 +150,7 @@ class Web3ModalViewModel: ObservableObject {
         
         return chains
             .compactMap { chain in
-                ChainPresets.ethChains.first(where: { chain.reference == $0.chainReference && chain.namespace == $0.chainNamespace })
+                ChainPresets.allChains.first(where: { chain.reference == $0.chainReference && chain.namespace == $0.chainNamespace })
             }
     }
     

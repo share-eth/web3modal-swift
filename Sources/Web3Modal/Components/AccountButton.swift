@@ -28,7 +28,7 @@ struct AccountButtonStyle: ButtonStyle {
     }
     
     var selectedChain: Chain {
-        return store.selectedChain ?? ChainPresets.ethChains.first!
+        return store.selectedChain ?? ChainPresets.allChains.first!
     }
     
     func makeBody(configuration: Configuration) -> some View {
