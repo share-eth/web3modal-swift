@@ -4,6 +4,7 @@ import struct CoinbaseWalletSDK.ActionError
 import Combine
 import Foundation
 import UIKit
+import phantom_swift
 
 // Web3 Modal Client
 ///
@@ -55,11 +56,15 @@ public class Web3ModalClient {
                 )
             }
             .merge(with: coinbaseResponseSubject)
+            .merge(with: phantomResponseSubject)
             .eraseToAnyPublisher()
     }
     
     public var coinbaseResponseSubject = PassthroughSubject<W3MResponse, Never>()
     public var coinbaseConnectedSubject = PassthroughSubject<Void, Never>()
+    
+    public var phantomResponseSubject = PassthroughSubject<W3MResponse, Never>()
+    public var phantomConnectedSubject = PassthroughSubject<Void, Never>()
     
     /// Publisher that sends web socket connection status
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
@@ -256,6 +261,22 @@ public class Web3ModalClient {
                     self.coinbaseResponseSubject.send(response)
                 }
             }
+        case .phantom:
+            if case let .personal_sign(address, message) = request {
+                let response: W3MResponse
+                do {
+                    let signature = try await PhantomClient.shared?.signMessage(message: message)
+                    signature?.toHexEncodedString()
+                    response = .init(result: .response(AnyCodable(signature)))
+                } catch {
+                    response = .init(result: .error(.init(code: -1, message: error.localizedDescription)))
+                }
+                self.phantomResponseSubject.send(response)
+            } else {
+                fatalError("TODO: Not implemented yet")
+            }
+            
+            
         case .none:
             break
         }
@@ -297,6 +318,15 @@ public class Web3ModalClient {
             } else {
                 analyticsService.track(.DISCONNECT_SUCCESS)
             }
+        case .phantom:
+            do {
+                try await PhantomClient.shared?.disconnectWallet()
+                analyticsService.track(.DISCONNECT_SUCCESS)
+            } catch {
+                analyticsService.track(.DISCONNECT_ERROR)
+                throw error
+            }
+            
         case .none:
             break
         }
@@ -381,6 +411,11 @@ public class Web3ModalClient {
     @discardableResult
     public func handleDeeplink(_ url: URL) -> Bool {
         do {
+            if Phantom.canHandle(url: url) {
+                try PhantomClient.shared?.processDeeplink(url: url)
+                return true
+            }
+            
             return try CoinbaseWalletSDK.shared.handleResponse(url)
         } catch {
             store.toast = .init(style: .error, message: error.localizedDescription)
