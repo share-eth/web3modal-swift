@@ -59,7 +59,8 @@ struct ConnectWalletView: View {
         ForEach(wallets, id: \.self) { wallet in
             Group {
                 let isRecent: Bool = wallet.lastTimeUsed != nil
-                let tagTitle: String? = isRecent ? "RECENT" : nil
+                let isInstalled: Bool = wallet.isInstalled
+                let tagTitle: String? = isRecent ? "RECENT" : isInstalled ? "INSTALLED" : nil
                 
                 Button(action: {
                     Task {
