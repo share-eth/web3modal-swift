@@ -1,5 +1,5 @@
 {
-  "originHash" : "5004d27053cfd244389693b4c9a9e014e1ae11145ba5ea42814e2fe980120328",
+  "originHash" : "893d75eca3d92fa8f4d1de8c6a5c30713b67156e24e27a716375632c4ce36f0a",
   "pins" : [
     {
       "identity" : "atlantis",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "5145a7041ec71421d09653db87dcc80c81792004",
         "version" : "1.24.0"
+      }
+    },
+    {
+      "identity" : "phantom-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/share-eth/phantom-swift",
+      "state" : {
+        "branch" : "main",
+        "revision" : "79e7545dabceb6ae40e8d8c7221b278d21fe9359"
       }
     },
     {
@@ -47,12 +56,30 @@
       }
     },
     {
+      "identity" : "swift-snapshot-testing",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
+      "state" : {
+        "revision" : "f29e2014f6230cf7d5138fc899da51c7f513d467",
+        "version" : "1.10.0"
+      }
+    },
+    {
       "identity" : "swiftimagereadwrite",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/dagronf/SwiftImageReadWrite",
       "state" : {
         "revision" : "5596407d1cf61b953b8e658fa8636a471df3c509",
         "version" : "1.1.6"
+      }
+    },
+    {
+      "identity" : "tweetnacl-swiftwrap",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bitmark-inc/tweetnacl-swiftwrap.git",
+      "state" : {
+        "revision" : "f8fd111642bf2336b11ef9ea828510693106e954",
+        "version" : "1.1.0"
       }
     },
     {
