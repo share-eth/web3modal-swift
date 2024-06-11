@@ -144,6 +144,7 @@ public class Web3Modal {
         configurePhantomIfNeeded(
             store: store,
             metadata: metadata,
+            sessionParams: sessionParams,
             w3mApiInteractor: w3mApiInteractor
         )
         
@@ -248,8 +249,13 @@ public class Web3Modal {
     private static func configurePhantomIfNeeded(
         store: Store,
         metadata: AppMetadata,
+        sessionParams: SessionParams,
         w3mApiInteractor: W3MAPIInteractor
     ) {
+        guard let keys = sessionParams.optionalNamespaces?.keys, 
+                  keys.contains("solana")
+        else { return }
+        
 //        let redirectLink = metadata.redirect?.universal ?? metadata.redirect?.native ?? "w3mdapp://"
         let redirectLink = metadata.redirect?.native ?? metadata.redirect?.universal ?? "w3mdapp://"
 
