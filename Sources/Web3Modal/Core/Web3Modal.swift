@@ -169,6 +169,10 @@ public class Web3Modal {
         Web3Modal.config.sessionParams = sessionParams
     }
     
+    public static func set(authRequestParams: AuthRequestParams?) {
+        Web3Modal.config.authRequestParams = authRequestParams
+    }
+    
     private static func configureCoinbaseIfNeeded(
         store: Store,
         metadata: AppMetadata,
