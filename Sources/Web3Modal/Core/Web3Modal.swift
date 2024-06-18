@@ -266,7 +266,8 @@ public class Web3Modal {
             imageId: "c38443bb-b3c1-4697-e569-408de3fcc100",
             order: 1,
             mobileLink: nil,
-            desktopLink: nil,
+            desktopLink: nil, 
+            linkMode: nil,
             webappLink: nil,
             appStore: "https://apps.apple.com/app/phantom-solana-wallet/1598432977",
             isInstalled: PhantomClient.isInstalled(),
@@ -405,17 +406,17 @@ public struct SessionParams {
     public static let `default`: Self = {
         let methods: Set<String> = Set(EthUtils.ethMethods)
         let events: Set<String> = ["chainChanged", "accountsChanged"]
-        let blockchains = ChainPresets.ethChains.map(\.id).compactMap(Blockchain.init)
+        let ethBlockchains = ChainPresets.ethChains.map(\.id).compactMap(Blockchain.init)
 
         let namespaces: [String: ProposalNamespace] = [
             "eip155": ProposalNamespace(
-                chains: blockchains,
+                chains: ethBlockchains,
                 methods: methods,
                 events: events
             )
         ]
         
-        let solBlockchains: Set<Blockchain> = Set(ChainPresets.solChains.map(\.id).compactMap(Blockchain.init))
+        let solBlockchains = ChainPresets.solChains.map(\.id).compactMap(Blockchain.init)
         let optionalNamespaces: [String: ProposalNamespace] = [
             "solana": ProposalNamespace(
                 chains: solBlockchains,
