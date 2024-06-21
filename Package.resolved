@@ -1,5 +1,5 @@
 {
-  "originHash" : "13cb6470a1da3468f7d91feff9629905a12e045088ddd775f7ecaeee88128b18",
+  "originHash" : "921b083934d49c4c926037fcd85c712aae7e036e7243ecc2ad743aaa2afd241c",
   "pins" : [
     {
       "identity" : "phantom-swift",
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/WalletConnect/WalletConnectSwiftV2",
       "state" : {
-        "revision" : "4f93c19f02b5b9ae0a984794cae542b9ca1b7471",
-        "version" : "1.13.0"
+        "revision" : "8ab4897841a5d04b832f2010a542a246be37998d",
+        "version" : "1.19.3"
       }
     }
   ],

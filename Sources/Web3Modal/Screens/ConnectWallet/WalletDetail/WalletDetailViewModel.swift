@@ -20,7 +20,8 @@ class WalletDetailViewModel: ObservableObject {
     let router: Router
     let store: Store
     let signInteractor: SignInteractor
-    
+
+
     @Published var preferredPlatform: Platform = .mobile
     
     private var disposeBag = Set<AnyCancellable>()
@@ -55,7 +56,43 @@ class WalletDetailViewModel: ObservableObject {
             }
             .store(in: &disposeBag)
     }
-    
+
+    func cancel() async throws {
+        store.SIWEFallbackState = false
+        guard let topic = store.session?.topic else { return }
+        try await Web3Modal.instance.disconnect(topic: topic)
+    }
+
+    func signSIWE() async throws {
+        DispatchQueue.main.async { [weak self] in
+            self?.store.SIWEFallbackState = false
+        }
+        guard let account = store.account?.account(),
+              let authRequestParams = Web3Modal.config.authRequestParams,
+        let topic = Web3Modal.instance.getSessions().first?.topic,
+        let chain = Web3Modal.instance.getSelectedChain(),
+        let blockchain = Blockchain(namespace: chain.chainNamespace, reference: chain.chainReference)
+        else { return }
+
+        let authPayload = AuthPayload(requestParams: authRequestParams, iat: DefaultIATProvider().iat)
+        let siweMessage = try Sign.instance.formatAuthMessage(payload: authPayload, account: account)
+
+
+        let rpcRequest = try Request(topic: topic, method: "personal_sign", params: AnyCodable([siweMessage, account.address]), chainId: blockchain)
+        try await Sign.instance.request(params: rpcRequest)
+
+        store.siweRequestId = rpcRequest.id
+        store.siweMessage = siweMessage
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.navigateToDeepLink(
+                wallet: self.wallet,
+                preferBrowser: preferredPlatform == .browser
+            )
+        }
+    }
+
     func handle(_ event: Event) {
         switch event {
         case .didTapCopy:

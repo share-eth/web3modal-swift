@@ -69,8 +69,10 @@ public class Web3Modal {
         
         let projectId: String
         var metadata: AppMetadata
+        let crypto: CryptoProvider
         var sessionParams: SessionParams
-        
+        var authRequestParams: AuthRequestParams?
+
         let includeWebWallets: Bool
         let recommendedWalletIds: [String]
         let excludedWalletIds: [String]
@@ -79,6 +81,7 @@ public class Web3Modal {
         let preferUniversalLinks: Bool
 
         let onError: (Error) -> Void
+
     }
     
     private(set) static var config: Config!
@@ -93,7 +96,9 @@ public class Web3Modal {
     public static func configure(
         projectId: String,
         metadata: AppMetadata,
+        crypto: CryptoProvider,
         sessionParams: SessionParams = .default,
+        authRequestParams: AuthRequestParams?,
         includeWebWallets: Bool = true,
         recommendedWalletIds: [String] = [],
         excludedWalletIds: [String] = [],
@@ -107,7 +112,9 @@ public class Web3Modal {
         Web3Modal.config = Web3Modal.Config(
             projectId: projectId,
             metadata: metadata,
+            crypto: crypto,
             sessionParams: sessionParams,
+            authRequestParams: authRequestParams,
             includeWebWallets: includeWebWallets,
             recommendedWalletIds: recommendedWalletIds,
             excludedWalletIds: excludedWalletIds,
@@ -116,7 +123,9 @@ public class Web3Modal {
             preferUniversalLinks: preferUniversalLinks,
             onError: onError
         )
-        
+
+        Sign.configure(crypto: crypto)
+
         let store = Store.shared
         let router = Router()
         let w3mApiInteractor = W3MAPIInteractor(store: store)
@@ -144,7 +153,8 @@ public class Web3Modal {
             store: store,
             w3mApiInteractor: w3mApiInteractor,
             signInteractor: signInteractor,
-            blockchainApiInteractor: blockchainApiInteractor
+            blockchainApiInteractor: blockchainApiInteractor,
+            supportsAuthenticatedSession: (config.authRequestParams != nil)
         )
         
         Task {
@@ -157,6 +167,10 @@ public class Web3Modal {
     
     public static func set(sessionParams: SessionParams) {
         Web3Modal.config.sessionParams = sessionParams
+    }
+    
+    public static func set(authRequestParams: AuthRequestParams?) {
+        Web3Modal.config.authRequestParams = authRequestParams
     }
     
     private static func configureCoinbaseIfNeeded(
@@ -185,6 +199,7 @@ public class Web3Modal {
             imageId: "a5ebc364-8f91-4200-fcc6-be81310a0000",
             order: 4,
             mobileLink: nil,
+            linkMode: nil,
             desktopLink: nil,
             webappLink: nil,
             appStore: "https://apps.apple.com/us/app/coinbase-wallet-nfts-crypto/id1278383455",
@@ -241,12 +256,10 @@ public class Web3Modal {
         sessionParams: SessionParams,
         w3mApiInteractor: W3MAPIInteractor
     ) {
-        guard let keys = sessionParams.optionalNamespaces?.keys, 
-                  keys.contains("solana")
+        guard let redirectLink = metadata.redirect?.universal ?? metadata.redirect?.native,
+            let keys = sessionParams.optionalNamespaces?.keys,
+            keys.contains("solana")
         else { return }
-        
-//        let redirectLink = metadata.redirect?.universal ?? metadata.redirect?.native ?? "w3mdapp://"
-        let redirectLink = metadata.redirect?.native ?? metadata.redirect?.universal ?? "w3mdapp://"
 
         let wallet: Wallet = .init(
             id: "a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393",
@@ -255,6 +268,7 @@ public class Web3Modal {
             imageId: "c38443bb-b3c1-4697-e569-408de3fcc100",
             order: 1,
             mobileLink: nil,
+            linkMode: nil,
             desktopLink: nil,
             webappLink: nil,
             appStore: "https://apps.apple.com/app/phantom-solana-wallet/1598432977",
@@ -394,17 +408,17 @@ public struct SessionParams {
     public static let `default`: Self = {
         let methods: Set<String> = Set(EthUtils.ethMethods)
         let events: Set<String> = ["chainChanged", "accountsChanged"]
-        let blockchains: Set<Blockchain> = Set(ChainPresets.ethChains.map(\.id).compactMap(Blockchain.init))
-        
+        let ethBlockchains = ChainPresets.ethChains.map(\.id).compactMap(Blockchain.init)
+
         let namespaces: [String: ProposalNamespace] = [
             "eip155": ProposalNamespace(
-                chains: blockchains,
+                chains: ethBlockchains,
                 methods: methods,
                 events: events
             )
         ]
         
-        let solBlockchains: Set<Blockchain> = Set(ChainPresets.solChains.map(\.id).compactMap(Blockchain.init))
+        let solBlockchains = ChainPresets.solChains.map(\.id).compactMap(Blockchain.init)
         let optionalNamespaces: [String: ProposalNamespace] = [
             "solana": ProposalNamespace(
                 chains: solBlockchains,
