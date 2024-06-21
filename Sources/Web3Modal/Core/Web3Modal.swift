@@ -248,12 +248,10 @@ public class Web3Modal {
         sessionParams: SessionParams,
         w3mApiInteractor: W3MAPIInteractor
     ) {
-        guard let keys = sessionParams.optionalNamespaces?.keys, 
-                  keys.contains("solana")
+        guard let redirectLink = metadata.redirect?.universal ?? metadata.redirect?.native,
+            let keys = sessionParams.optionalNamespaces?.keys,
+            keys.contains("solana")
         else { return }
-        
-//        let redirectLink = metadata.redirect?.universal ?? metadata.redirect?.native ?? "w3mdapp://"
-        let redirectLink = metadata.redirect?.native ?? metadata.redirect?.universal ?? "w3mdapp://"
 
         let wallet: Wallet = .init(
             id: "a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393",
