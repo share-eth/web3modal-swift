@@ -1,6 +1,15 @@
 {
-  "originHash" : "56f8751b4a2521af0506ea135e55db03c7e490f1e26ffd293f3700d07af256b6",
+  "originHash" : "1a55990a39ab16065f860da93da98dde0992104258e8677c22e6c901603007e8",
   "pins" : [
+    {
+      "identity" : "phantom-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/share-eth/phantom-swift",
+      "state" : {
+        "branch" : "main",
+        "revision" : "79e7545dabceb6ae40e8d8c7221b278d21fe9359"
+      }
+    },
     {
       "identity" : "qrcode",
       "kind" : "remoteSourceControl",
@@ -60,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/WalletConnect/WalletConnectSwiftV2",
       "state" : {
-        "revision" : "4f93c19f02b5b9ae0a984794cae542b9ca1b7471",
-        "version" : "1.13.0"
+        "revision" : "8ab4897841a5d04b832f2010a542a246be37998d",
+        "version" : "1.19.3"
       }
     }
   ],

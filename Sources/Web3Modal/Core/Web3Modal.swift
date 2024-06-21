@@ -1,6 +1,7 @@
 import CoinbaseWalletSDK
 import Foundation
 import SwiftUI
+import phantom_swift
 
 #if canImport(UIKit)
 import UIKit
@@ -140,6 +141,12 @@ public class Web3Modal {
             w3mApiInteractor: w3mApiInteractor
         )
         
+        configurePhantomIfNeeded(
+            store: store,
+            metadata: metadata,
+            w3mApiInteractor: w3mApiInteractor
+        )
+        
         Web3Modal.viewModel = Web3ModalViewModel(
             router: router,
             store: store,
@@ -237,7 +244,71 @@ public class Web3Modal {
             try? await w3mApiInteractor.fetchWalletImages(for: [wallet])
         }
     }
+    
+    private static func configurePhantomIfNeeded(
+        store: Store,
+        metadata: AppMetadata,
+        w3mApiInteractor: W3MAPIInteractor
+    ) {
+//        let redirectLink = metadata.redirect?.universal ?? metadata.redirect?.native ?? "w3mdapp://"
+        let redirectLink = metadata.redirect?.native ?? metadata.redirect?.universal ?? "w3mdapp://"
 
+        let wallet: Wallet = .init(
+            id: "a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393",
+            name: "Phantom",
+            homepage: "https://phantom.app/",
+            imageId: "c38443bb-b3c1-4697-e569-408de3fcc100",
+            order: 1,
+            mobileLink: nil,
+            desktopLink: nil,
+            webappLink: nil,
+            appStore: "https://apps.apple.com/app/phantom-solana-wallet/1598432977",
+            isInstalled: PhantomClient.isInstalled(),
+            alternativeConnectionMethod: {
+                let cluster: SolanaCluster = .mainnetBeta
+                let phantom = PhantomClient(config: .init(
+                    appUrl: metadata.url,
+                    cluster: cluster,
+                    redirectUrl: redirectLink
+                ))
+                PhantomClient.shared = phantom
+                
+                Task { @MainActor in
+                    do {
+                        let session = try await phantom.connectWallet()
+                        let blockchain = Blockchain(cluster.chainId)!
+                        
+                        store.connectedWith = .phantom
+                        store.account = .init(
+                            address: session.walletAddress,
+                            chain: blockchain
+                        )
+                        
+                        withAnimation {
+                            store.isModalShown = false
+                        }
+                        Web3Modal.viewModel.router.setRoute(Router.AccountSubpage.profile)
+                        
+                        let matchingChain = ChainPresets.solChains.first(where: {
+                            $0.chainNamespace == blockchain.namespace && $0.chainReference == blockchain.reference
+                        })
+                    
+                        store.selectedChain = matchingChain
+                    
+                        instance.phantomConnectedSubject.send()
+                    } catch {
+                        store.toast = .init(style: .error, message: error.localizedDescription)
+                    }
+                }
+            }
+        )
+                        
+        store.customWallets.append(wallet)
+            
+        Task { [wallet] in
+            try? await w3mApiInteractor.fetchWalletImages(for: [wallet])
+        }
+    }
 }
 
 #if canImport(UIKit)
@@ -338,11 +409,10 @@ public struct SessionParams {
             )
         ]
         
+        let solBlockchains: Set<Blockchain> = Set(ChainPresets.solChains.map(\.id).compactMap(Blockchain.init))
         let optionalNamespaces: [String: ProposalNamespace] = [
             "solana": ProposalNamespace(
-                chains: [
-                    Blockchain("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")!
-                ],
+                chains: solBlockchains,
                 methods: [
                     "solana_signMessage",
                     "solana_signTransaction"
