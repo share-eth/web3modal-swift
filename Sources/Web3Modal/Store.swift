@@ -79,6 +79,8 @@ class Store: ObservableObject {
     @Published var chainImages: [String: UIImage] = [:]
     
     @Published var toast: Toast? = nil
+    
+    var preferUniversalLinks: Bool = false
 }
 
 struct W3MAccount: Codable {
