@@ -363,24 +363,12 @@ public class Web3ModalClient {
     public func launchCurrentWallet() {
         guard
             let session = store.session,
-            let urlString = if store.preferUniversalLinks {
-                session.peer.redirect?.universal ?? session.peer.redirect?.native
-            } else {
-                session.peer.redirect?.native ?? session.peer.redirect?.universal
-            },
+            let urlString = session.peer.redirect?.native ?? session.peer.redirect?.universal,
             let url = URL(string: urlString)
-        else {
-            self.store.toast = .init(style: .error, message: "Invalid redirect URL")
-            return
-        }
+        else { return }
         
-        let isHttp: Bool = url.scheme?.lowercased().hasPrefix("http") == true
         DispatchQueue.main.async {
-            UIApplication.shared.open(url, options: [.universalLinksOnly: isHttp]) { result in
-                if !result {
-                    self.store.toast = .init(style: .error, message: "Failed to open wallet")
-                }
-            }
+            UIApplication.shared.open(url, completionHandler: nil)
         }
     }
     
