@@ -363,11 +363,7 @@ public class Web3ModalClient {
     public func launchCurrentWallet() {
         guard
             let session = store.session,
-            let urlString = if store.preferUniversalLinks {
-                session.peer.redirect?.universal ?? session.peer.redirect?.native
-            } else {
-                session.peer.redirect?.native ?? session.peer.redirect?.universal
-            },
+            let urlString = session.peer.redirect?.native ?? session.peer.redirect?.universal,
             let url = URL(string: urlString)
         else {
             self.store.toast = .init(style: .error, message: "Invalid redirect URL")

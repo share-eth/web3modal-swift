@@ -78,7 +78,6 @@ public class Web3Modal {
         let excludedWalletIds: [String]
         let customWallets: [Wallet]
         let coinbaseEnabled: Bool
-        let preferUniversalLinks: Bool
 
         let onError: (Error) -> Void
 
@@ -104,7 +103,6 @@ public class Web3Modal {
         excludedWalletIds: [String] = [],
         customWallets: [Wallet] = [],
         coinbaseEnabled: Bool = true,
-        preferUniversalLinks: Bool = false,
         onError: @escaping (Error) -> Void = { _ in }
     ) {
         Pair.configure(metadata: metadata)
@@ -120,7 +118,6 @@ public class Web3Modal {
             excludedWalletIds: excludedWalletIds,
             customWallets: customWallets,
             coinbaseEnabled: coinbaseEnabled,
-            preferUniversalLinks: preferUniversalLinks,
             onError: onError
         )
 
@@ -132,7 +129,6 @@ public class Web3Modal {
         let signInteractor = SignInteractor(store: store)
         let blockchainApiInteractor = BlockchainAPIInteractor(store: store)
         
-        store.preferUniversalLinks = preferUniversalLinks
         store.customWallets = customWallets
         
         configureCoinbaseIfNeeded(
@@ -180,11 +176,8 @@ public class Web3Modal {
     ) {
         guard Web3Modal.config.coinbaseEnabled else { return }
         
-        if let redirectLink = if store.preferUniversalLinks {
-            metadata.redirect?.universal ?? metadata.redirect?.native
-        } else {
-            metadata.redirect?.native ?? metadata.redirect?.universal
-        } {
+        if let redirectLink = metadata.redirect?.native ?? metadata.redirect?.universal
+        {
             CoinbaseWalletSDK.configure(callback: URL(string: redirectLink)!)
         } else {
             CoinbaseWalletSDK.configure(
