@@ -176,8 +176,7 @@ public class Web3Modal {
     ) {
         guard Web3Modal.config.coinbaseEnabled else { return }
         
-        if let redirectLink = metadata.redirect?.native ?? metadata.redirect?.universal
-        {
+        if let redirectLink = metadata.redirect?.universal ?? metadata.redirect?.native {
             CoinbaseWalletSDK.configure(callback: URL(string: redirectLink)!)
         } else {
             CoinbaseWalletSDK.configure(
