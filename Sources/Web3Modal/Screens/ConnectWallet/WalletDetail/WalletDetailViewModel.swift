@@ -86,7 +86,7 @@ class WalletDetailViewModel: ObservableObject {
 
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.navigateToDeepLink(
+            self.navigateToWallet(
                 wallet: self.wallet,
                 preferBrowser: preferredPlatform == .browser
             )
@@ -102,7 +102,7 @@ class WalletDetailViewModel: ObservableObject {
             
             if wallet.alternativeConnectionMethod == nil {
                 
-                navigateToDeepLink(
+                navigateToWalletWithPairingUri(
                     wallet: wallet,
                     preferBrowser: preferredPlatform == .browser
                 )
@@ -118,7 +118,7 @@ class WalletDetailViewModel: ObservableObject {
                 store.retryShown = false
             
             if wallet.alternativeConnectionMethod == nil {
-                navigateToDeepLink(
+                navigateToWalletWithPairingUri(
                     wallet: wallet,
                     preferBrowser: preferredPlatform == .browser
                 )
@@ -139,8 +139,24 @@ class WalletDetailViewModel: ObservableObject {
         
         router.openURL(storeLink)
     }
-    
-    private func navigateToDeepLink(wallet: Wallet, preferBrowser: Bool) {
+
+    private func navigateToWallet(wallet: Wallet, preferBrowser: Bool) {
+        do {
+            let link = preferBrowser ? wallet.webappLink : wallet.mobileLink
+            if let url = link?.toURL() {
+                router.openURL(url) { success in
+                    self.store.toast = .init(style: .error, message: DeeplinkErrors.failedToOpen.localizedDescription)
+                }
+            } else {
+                throw DeeplinkErrors.noWalletLinkFound
+            }
+        } catch {
+            store.toast = .init(style: .error, message: error.localizedDescription)
+            Web3Modal.config.onError(error)
+        }
+    }
+
+    private func navigateToWalletWithPairingUri(wallet: Wallet, preferBrowser: Bool) {
         do {
             let link = preferBrowser ? wallet.webappLink : wallet.mobileLink
             
