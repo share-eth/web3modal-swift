@@ -1,4 +1,5 @@
 import UIKit
+import OSLog
 
 final class W3MAPIInteractor: ObservableObject {
     @Published var isLoading: Bool = false
@@ -37,7 +38,8 @@ final class W3MAPIInteractor: ObservableObject {
             search: search,
             projectId: Web3Modal.config.projectId,
             metadata: Web3Modal.config.metadata,
-            recommendedIds: Web3Modal.config.recommendedWalletIds,
+            // Leave this empty or the we won't get the right total, it'll only return the # of entries
+            recommendedIds: [], //Web3Modal.config.recommendedWalletIds + store.installedWalletIds,
             excludedIds: Web3Modal.config.excludedWalletIds
         )
         
@@ -87,33 +89,80 @@ final class W3MAPIInteractor: ObservableObject {
                 )
             )
         )
-    
-        let installedWallets: [String?] = try await response.data.concurrentMap { walletMetadata in
+                
+        // Determine if there are new schemes that should be added to app's LSApplicationQueriesSchemes
+        let registeredSchemes = response.data.map { $0.ios_schema }
+        let newSchemes = registeredSchemes.filter { !store.queryableWalletSchemes.contains($0) }.map { $0.replacingOccurrences(of: "://", with: "") }
+        if newSchemes.count > 0 {
+            print("[web3modal] \(newSchemes.count) of \(registeredSchemes.count) schemes should be added to your app's Info.plist:\n\(newSchemes)\n")
+        }
+        
+        // Detect which wallets are installed
+        var installedSchemes: [String] = []
+        let installedWallets: [String] = try await response.data.concurrentMap { walletMetadata in
             guard
                 let nativeUrl = URL(string: walletMetadata.ios_schema),
                 await UIApplication.shared.canOpenURL(nativeUrl)
             else {
                 return nil
             }
-                
+                            
+            installedSchemes.append(walletMetadata.ios_schema)
             return walletMetadata.id
-        }
-            
+        }.compactMap { $0 }
+        
+        print("[web3modal] \(installedSchemes.count) installed wallet schemes:b\(installedSchemes.map { $0.replacingOccurrences(of: "://", with: "") })")
         store.installedWalletIds = installedWallets.compactMap { $0 }
     }
     
     func fetchFeaturedWallets() async throws {
+        let walletsToFetch = Web3Modal.config.recommendedWalletIds + store.installedWalletIds
         let httpClient = HTTPNetworkClient(host: "api.web3modal.com")
         let response = try await httpClient.request(
             GetWalletsResponse.self,
             at: Web3ModalAPI.getWallets(
                 params: .init(
                     page: 1,
-                    entries: 4,
+                    entries: max(walletsToFetch.count, 6),
                     search: "",
                     projectId: Web3Modal.config.projectId,
                     metadata: Web3Modal.config.metadata,
-                    recommendedIds: Web3Modal.config.recommendedWalletIds,
+                    recommendedIds: walletsToFetch,
+                    excludedIds: Web3Modal.config.excludedWalletIds
+                )
+            )
+        )
+                
+        try await fetchWalletImages(for: response.data)
+        
+        DispatchQueue.main.async { [self] in
+            
+            var wallets = response.data
+            
+            for index in wallets.indices {
+                let contains = store.installedWalletIds.contains(wallets[index].id)
+                wallets[index].isInstalled = contains
+            }
+            
+            self.store.totalNumberOfWallets = response.count
+            self.store.featuredWallets.append(contentsOf: wallets)
+        }
+    }
+    
+    // Use this to populate the totalNumberOfWallets. The fetch with 'include' only returns the # returned instead of total
+    func fetchAllWalletsFirstPage() async throws {
+        let walletsToFetch = Web3Modal.config.recommendedWalletIds + store.installedWalletIds
+        let httpClient = HTTPNetworkClient(host: "api.web3modal.com")
+        let response = try await httpClient.request(
+            GetWalletsResponse.self,
+            at: Web3ModalAPI.getWallets(
+                params: .init(
+                    page: 1,
+                    entries: entriesPerPage,
+                    search: "",
+                    projectId: Web3Modal.config.projectId,
+                    metadata: Web3Modal.config.metadata,
+                    recommendedIds: [],
                     excludedIds: Web3Modal.config.excludedWalletIds
                 )
             )

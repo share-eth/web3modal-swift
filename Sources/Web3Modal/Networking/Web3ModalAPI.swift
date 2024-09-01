@@ -44,8 +44,8 @@ enum Web3ModalAPI: HTTPService {
                 "page": "\(params.page)",
                 "entries": "\(params.entries)",
                 "search": params.search ?? "",
-                "recommendedIds": params.recommendedIds.joined(separator: ","),
-                "excludedIds": params.excludedIds.joined(separator: ","),
+                "include": params.recommendedIds.joined(separator: ","),
+                "exclude": params.excludedIds.joined(separator: ","),
                 "platform": "ios",
             ]
             .compactMapValues { value in

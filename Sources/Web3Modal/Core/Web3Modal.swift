@@ -76,6 +76,7 @@ public class Web3Modal {
         let includeWebWallets: Bool
         let recommendedWalletIds: [String]
         let excludedWalletIds: [String]
+        let queryableWalletSchemes: [String]
         let customWallets: [Wallet]
         let coinbaseEnabled: Bool
 
@@ -101,6 +102,7 @@ public class Web3Modal {
         includeWebWallets: Bool = true,
         recommendedWalletIds: [String] = [],
         excludedWalletIds: [String] = [],
+        queryableWalletSchemes: [String] = [],
         customWallets: [Wallet] = [],
         coinbaseEnabled: Bool = true,
         onError: @escaping (Error) -> Void = { _ in }
@@ -116,6 +118,7 @@ public class Web3Modal {
             includeWebWallets: includeWebWallets,
             recommendedWalletIds: recommendedWalletIds,
             excludedWalletIds: excludedWalletIds,
+            queryableWalletSchemes: queryableWalletSchemes,
             customWallets: customWallets,
             coinbaseEnabled: coinbaseEnabled,
             onError: onError
@@ -129,6 +132,7 @@ public class Web3Modal {
         let signInteractor = SignInteractor(store: store)
         let blockchainApiInteractor = BlockchainAPIInteractor(store: store)
         
+        store.queryableWalletSchemes = queryableWalletSchemes
         store.customWallets = customWallets
         
         configureCoinbaseIfNeeded(
@@ -157,6 +161,7 @@ public class Web3Modal {
             try? await w3mApiInteractor.fetchWalletImages(for: store.recentWallets + store.customWallets)
             try? await w3mApiInteractor.fetchAllWalletMetadata()
             try? await w3mApiInteractor.fetchFeaturedWallets()
+            try? await w3mApiInteractor.fetchAllWalletsFirstPage()
             try? await w3mApiInteractor.prefetchChainImages()
         }
     }
