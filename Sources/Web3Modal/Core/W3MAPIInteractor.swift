@@ -140,6 +140,10 @@ final class W3MAPIInteractor: ObservableObject {
         
         try await wallets.concurrentMap { wallet in
             
+            if wallet.id == "desktopWallet" {
+                return (wallet.id, UIImage(resource: .desktopWallet))
+            }
+            
             // Build URL
             var imageUrl: URL?
             if let imageId = wallet.imageId {

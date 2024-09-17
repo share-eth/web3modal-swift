@@ -28,7 +28,30 @@ struct ConnectWalletView: View {
             return featuredWallet
         }
         
-        return (recentWallets + result)
+        let recommended = Web3Modal.config.recommendedWalletIds
+        let installed = store.installedWalletIds
+        let distantPast = Date.distantPast
+        
+        return Array(unsortedWallets
+            .sorted(by: { $0.order < $1.order } )
+            .sorted(by: {
+                if installed.contains($0.id) && installed.contains($1.id) {
+                    return installed.firstIndex(of: $0.id)! < installed.firstIndex(of: $1.id)!
+                } else {
+                    return installed.contains($0.id) && !installed.contains($1.id)
+                }
+            } )
+            .sorted(by: {
+                if recommended.contains($0.id) && recommended.contains($1.id) {
+                    return recommended.firstIndex(of: $0.id)! < recommended.firstIndex(of: $1.id)!
+                } else {
+                    return recommended.contains($0.id) && !recommended.contains($1.id)
+                }
+            } )
+            .sorted(by: { $0.lastTimeUsed ?? distantPast > $1.lastTimeUsed ?? distantPast } )
+            .sorted(by: { $0.id == "desktopWallet" && $1.id != "desktopWallet" } )
+            .prefix(5)
+        )
     }
     
     var body: some View {
@@ -63,6 +86,11 @@ struct ConnectWalletView: View {
                 let tagTitle: String? = isRecent ? "RECENT" : isInstalled ? "INSTALLED" : nil
                 
                 Button(action: {
+                    Web3Modal.instance.didSelectWalletSubject.send(wallet)
+                    if wallet.customDidSelect {
+                        store.isModalShown = false
+                        return
+                    }
                     Task {
                         do {
                             try await signInteractor.connect(walletUniversalLink: wallet.linkMode)
