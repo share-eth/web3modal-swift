@@ -11,18 +11,19 @@ struct ConnectWalletView: View {
     let displayWCConnection = false
     
     var wallets: [Wallet] {
-        var recentWallets = store.recentWallets
-        
-        let result = (store.featuredWallets + store.customWallets).map { featuredWallet in
+        let recentWallets = store.recentWallets
+        /// CustomWallets must be added first to preserve their data and not get overwritten.
+        /// Then, FeaturedWallets are added to the set.
+        /// Finally, RecentWallets are added to the set, and if there are any duplicates, the lastTimeUsed property is updated.
+        let unsortedWallets = Set(store.customWallets).union(store.featuredWallets).union(recentWallets).map { featuredWallet in
+            
             var featuredWallet = featuredWallet
-            let (index, matchingRecentWallet) = recentWallets.enumerated().first { (index, recentWallet) in
-                featuredWallet.id == recentWallet.id
-            } ?? (nil, nil)
+            if let recent = recentWallets.first(where: { $0.id == featuredWallet.id }) {
+                featuredWallet.lastTimeUsed = recent.lastTimeUsed
+            }
             
-            
-            if let match = matchingRecentWallet, let matchingIndex = index  {
-                featuredWallet.lastTimeUsed = match.lastTimeUsed
-                recentWallets.remove(at: matchingIndex)
+            if featuredWallet.isInstalled, !store.installedWalletIds.contains(featuredWallet.id) {
+                store.installedWalletIds.append(featuredWallet.id)
             }
             
             return featuredWallet
@@ -81,7 +82,8 @@ struct ConnectWalletView: View {
     private func featuredWallets() -> some View {
         ForEach(wallets, id: \.self) { wallet in
             Group {
-                let isRecent: Bool = wallet.lastTimeUsed != nil
+                // Within the last 7 days
+                let isRecent: Bool = if let lastTimeUsed = wallet.lastTimeUsed { abs(lastTimeUsed.timeIntervalSinceNow) < (24 * 60 * 60 * 7) } else { false }
                 let isInstalled: Bool = wallet.isInstalled
                 let tagTitle: String? = isRecent ? "RECENT" : isInstalled ? "INSTALLED" : nil
                 

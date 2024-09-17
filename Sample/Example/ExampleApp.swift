@@ -58,7 +58,7 @@ class ExampleApp: App {
             projectId: projectId,
             metadata: metadata,
             crypto: DefaultCryptoProvider(),
-            authRequestParams: nil,
+            authRequestParams: nil, // use .stab() for testing SIWE
             customWallets: [
                 .init(
                     id: "swift-sample",
@@ -168,3 +168,4 @@ extension AuthRequestParams {
         )
     }
 }
+
