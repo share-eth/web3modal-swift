@@ -2,19 +2,20 @@ import Foundation
 
 public struct Wallet: Codable, Identifiable {
     public let id: String
-    let name: String
-    let homepage: String
-    let imageId: String?
-    let imageUrl: String?
-    let order: Int
-    let mobileLink: String?
-    let linkMode: String?
-    let desktopLink: String?
-    let webappLink: String?
-    let appStore: String?
+    public let name: String
+    public let homepage: String
+    public let imageId: String?
+    public let imageUrl: String?
+    public let order: Int
+    public let mobileLink: String?
+    public let linkMode: String?
+    public let desktopLink: String?
+    public let webappLink: String?
+    public let appStore: String?
     
-    var lastTimeUsed: Date?
-    var isInstalled: Bool = false
+    public internal (set) var lastTimeUsed: Date?
+    public var isInstalled: Bool = false
+    var customDidSelect: Bool = true
     var alternativeConnectionMethod: (() -> Void)? = nil
     
     enum CodingKeys: String, CodingKey {
@@ -49,6 +50,7 @@ public struct Wallet: Codable, Identifiable {
         appStore: String? = nil, 
         lastTimeUsed: Date? = nil, 
         isInstalled: Bool = false,
+        customDidSelect: Bool = true,
         alternativeConnectionMethod: (() -> Void)? = nil
     ) {
         self.id = id
@@ -64,6 +66,7 @@ public struct Wallet: Codable, Identifiable {
         self.appStore = appStore
         self.lastTimeUsed = lastTimeUsed
         self.isInstalled = isInstalled
+        self.customDidSelect = customDidSelect
         self.alternativeConnectionMethod = alternativeConnectionMethod
     }
     

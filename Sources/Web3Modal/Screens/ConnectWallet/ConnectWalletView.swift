@@ -50,6 +50,7 @@ struct ConnectWalletView: View {
                 }
             } )
             .sorted(by: { $0.lastTimeUsed ?? distantPast > $1.lastTimeUsed ?? distantPast } )
+            .sorted(by: { $0.id == "desktopWallet" && $1.id != "desktopWallet" } )
             .prefix(5)
         )
     }
@@ -87,6 +88,11 @@ struct ConnectWalletView: View {
                 let tagTitle: String? = isRecent ? "RECENT" : isInstalled ? "INSTALLED" : nil
                 
                 Button(action: {
+                    Web3Modal.instance.didSelectWalletSubject.send(wallet)
+                    if wallet.customDidSelect {
+                        store.isModalShown = false
+                        return
+                    }
                     Task {
                         do {
                             try await signInteractor.connect(walletUniversalLink: wallet.linkMode)

@@ -66,6 +66,8 @@ public class Web3ModalClient {
     public var phantomResponseSubject = PassthroughSubject<W3MResponse, Never>()
     public var phantomConnectedSubject = PassthroughSubject<Void, Never>()
     
+    public var didSelectWalletSubject = PassthroughSubject<Wallet, Never>()
+    
     /// Publisher that sends web socket connection status
     public var socketConnectionStatusPublisher: AnyPublisher<SocketConnectionStatus, Never> {
         signClient.socketConnectionStatusPublisher.eraseToAnyPublisher()
@@ -139,12 +141,10 @@ public class Web3ModalClient {
             if let authParams = Web3Modal.config.authRequestParams {
                 return try await signClient.authenticate(authParams, walletUniversalLink: walletUniversalLink)
             } else {
-                let pairingURI = try await pairingClient.create()
-                try await signClient.connect(
+                let pairingURI = try await signClient.connect(
                     requiredNamespaces: Web3Modal.config.sessionParams.requiredNamespaces,
                     optionalNamespaces: Web3Modal.config.sessionParams.optionalNamespaces,
-                    sessionProperties: Web3Modal.config.sessionParams.sessionProperties,
-                    topic: pairingURI.topic
+                    sessionProperties: Web3Modal.config.sessionParams.sessionProperties
                 )
                 return pairingURI
             }
@@ -163,14 +163,14 @@ public class Web3ModalClient {
     ///   - topic: Topic of a session
     public func ping(topic: String) async throws {
         do {
-            try await pairingClient.ping(topic: topic)
+            try await signClient.ping(topic: topic)
         } catch {
             Web3Modal.config.onError(error)
             throw error
         }
     }
     
-    public func request(_ request: W3MJSONRPC) async throws {
+    public func request(_ request: W3MJSONRPC) async throws -> Request? {
         logger.debug("Requesting: \(request.rawValues.method)")
         switch store.connectedWith {
         case .wc:
@@ -178,30 +178,38 @@ public class Web3ModalClient {
                 let session = getSessions().first,
                 let chain = getSelectedChain(),
                 let blockchain = Blockchain(namespace: chain.chainNamespace, reference: chain.chainReference)
-            else { return }
+            else { return nil }
             
+            let signRequest: Request
             if case let .personal_sign(address, message) = request {
-                try await signClient.request(
-                    params: .init(
-                        topic: session.topic,
-                        method: request.rawValues.method,
-                        params: AnyCodable(any: [message, address]),
-                        chainId: blockchain
-                    )
+                signRequest = try Request(
+                    topic: session.topic,
+                    method: request.rawValues.method,
+                    params: AnyCodable(any: [message, address]),
+                    chainId: blockchain
+                )
+            } else if case let .eth_signTypedData_v4(address, message) = request {
+                signRequest = try Request(
+                    topic: session.topic,
+                    method: request.rawValues.method,
+                    params: AnyCodable(any: [address, message]),
+                    chainId: blockchain
                 )
             } else {
-                try await signClient.request(
-                    params: .init(
-                        topic: session.topic,
-                        method: request.rawValues.method,
-                        params: AnyCodable(any: request.rawValues.params),
-                        chainId: blockchain
-                    )
+                signRequest = try Request(
+                    topic: session.topic,
+                    method: request.rawValues.method,
+                    params: AnyCodable(any: request.rawValues.params),
+                    chainId: blockchain
                 )
             }
+            try await signClient.request(
+                params: signRequest
+            )
+            return signRequest
         case .cb:
                     
-            guard let jsonRpc = request.toCbAction() else { return }
+            guard let jsonRpc = request.toCbAction() else { return nil }
                     
             // Execute on main as Coinbase SDK is not dispatching on main when calling UIApplication.openUrl()
             DispatchQueue.main.async {
@@ -238,6 +246,7 @@ public class Web3ModalClient {
                 }
             }
         case .phantom:
+            // This is a workaround for solana sign message support
             if case let .personal_sign(address, message) = request {
                 let response: W3MResponse
                 do {
@@ -256,6 +265,8 @@ public class Web3ModalClient {
         case .none:
             break
         }
+        
+        return nil
     }
     
     /// For sending JSON-RPC requests to wallet.
@@ -425,5 +436,31 @@ public class Web3ModalClient {
 
     public func disableAnalytics() {
         analyticsService.disable()
+    }
+}
+
+extension Data {
+    internal func prettyPrint() -> String {
+        guard let object = try? JSONSerialization.jsonObject(with: self, options: []),
+              let data = try? JSONSerialization.data(withJSONObject: object, options: [.sortedKeys, .prettyPrinted]),
+              let prettyPrintedString = String(data: data, encoding: .utf8)
+        else {
+            return "| Unable to pretty print! |"
+        }
+
+        return prettyPrintedString
+    }
+}
+
+extension Encodable {
+    internal func prettyPrint() -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
+        do {
+            let data = try encoder.encode(self)
+            return String(data: data, encoding: .utf8) ?? ""
+        } catch {
+            return "| Unable to pretty print! |"
+        }
     }
 }
