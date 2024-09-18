@@ -15,7 +15,7 @@ public struct Wallet: Codable, Identifiable {
     
     public internal (set) var lastTimeUsed: Date?
     public var isInstalled: Bool = false
-    var customDidSelect: Bool = true
+    var customDidSelect: Bool = false
     var alternativeConnectionMethod: (() -> Void)? = nil
     
     enum CodingKeys: String, CodingKey {
@@ -50,7 +50,7 @@ public struct Wallet: Codable, Identifiable {
         appStore: String? = nil, 
         lastTimeUsed: Date? = nil, 
         isInstalled: Bool = false,
-        customDidSelect: Bool = true,
+        customDidSelect: Bool = false,
         alternativeConnectionMethod: (() -> Void)? = nil
     ) {
         self.id = id
