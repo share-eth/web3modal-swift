@@ -141,15 +141,17 @@ public class Web3ModalClient {
             if let authParams = Web3Modal.config.authRequestParams {
                 return try await signClient.authenticate(authParams, walletUniversalLink: walletUniversalLink)
             } else {
-                let pairingURI = try await signClient.connect(
+                return try await signClient.connect(
                     requiredNamespaces: Web3Modal.config.sessionParams.requiredNamespaces,
                     optionalNamespaces: Web3Modal.config.sessionParams.optionalNamespaces,
                     sessionProperties: Web3Modal.config.sessionParams.sessionProperties
                 )
-                return pairingURI
             }
         } catch {
-            Web3Modal.config.onError(error)
+            // Ignore the error when link is nil, this is intentionally - i think
+            if walletUniversalLink != nil {
+                Web3Modal.config.onError(error)
+            }
             throw error
         }
     }
