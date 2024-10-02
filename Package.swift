@@ -21,7 +21,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/WalletConnect/WalletConnectSwiftV2",
-            .upToNextMinor(from: "1.20.0")
+            .upToNextMinor(from: "1.20.3")
         ),
         .package(
             url: "https://github.com/WalletConnect/QRCode",
@@ -32,7 +32,8 @@ let package = Package(
             .upToNextMinor(from: "1.10.0")
         ),
         .package(name: "CoinbaseWalletSDK", url: "https://github.com/WalletConnect/wallet-mobile-sdk", from: "1.0.0"),
-        .package(url: "https://github.com/share-eth/phantom-swift", branch: "main")
+        .package(url: "https://github.com/share-eth/phantom-swift", branch: "main"),
+        .package(url: "https://github.com/MetaMask/metamask-ios-sdk", from: "0.8.9"),
     ],
     targets: [
         .target(
@@ -47,6 +48,7 @@ let package = Package(
                 "Web3ModalBackport",
                 "CoinbaseWalletSDK",
                 "phantom-swift",
+                "metamask-ios-sdk",
             ],
             resources: [
                 .process("Resources/Assets.xcassets"),

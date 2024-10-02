@@ -50,7 +50,7 @@ struct ConnectWalletView: View {
                 }
             } )
             .sorted(by: { $0.lastTimeUsed ?? distantPast > $1.lastTimeUsed ?? distantPast } )
-            .sorted(by: { $0.id == "desktopWallet" && $1.id != "desktopWallet" } )
+            .sorted(by: { $0.id == DesktopWallet_walletId && $1.id != DesktopWallet_walletId } )
             .prefix(5)
         )
     }

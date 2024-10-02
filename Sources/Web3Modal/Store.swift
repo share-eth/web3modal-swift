@@ -6,6 +6,7 @@ enum ConnectionProviderType {
     case wc
     case cb
     case phantom
+    case metamask
 }
 
 class Store: ObservableObject {

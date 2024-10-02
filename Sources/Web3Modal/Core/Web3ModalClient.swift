@@ -5,6 +5,7 @@ import Combine
 import Foundation
 import UIKit
 import phantom_swift
+import metamask_ios_sdk
 
 // Web3 Modal Client
 ///
@@ -57,6 +58,7 @@ public class Web3ModalClient {
             }
             .merge(with: coinbaseResponseSubject)
             .merge(with: phantomResponseSubject)
+            .merge(with: metamaskResponseSubject)
             .eraseToAnyPublisher()
     }
     
@@ -65,6 +67,9 @@ public class Web3ModalClient {
     
     public var phantomResponseSubject = PassthroughSubject<W3MResponse, Never>()
     public var phantomConnectedSubject = PassthroughSubject<Void, Never>()
+    
+    public var metamaskResponseSubject = PassthroughSubject<W3MResponse, Never>()
+    public var metamaskConnectedSubject = PassthroughSubject<Void, Never>()
     
     public var didSelectWalletSubject = PassthroughSubject<Wallet, Never>()
     
@@ -141,15 +146,17 @@ public class Web3ModalClient {
             if let authParams = Web3Modal.config.authRequestParams {
                 return try await signClient.authenticate(authParams, walletUniversalLink: walletUniversalLink)
             } else {
-                let pairingURI = try await signClient.connect(
+                return try await signClient.connect(
                     requiredNamespaces: Web3Modal.config.sessionParams.requiredNamespaces,
                     optionalNamespaces: Web3Modal.config.sessionParams.optionalNamespaces,
                     sessionProperties: Web3Modal.config.sessionParams.sessionProperties
                 )
-                return pairingURI
             }
         } catch {
-            Web3Modal.config.onError(error)
+            // Ignore the error when link is nil, this is intentionally - i think
+            if walletUniversalLink != nil {
+                Web3Modal.config.onError(error)
+            }
             throw error
         }
     }
@@ -208,9 +215,9 @@ public class Web3ModalClient {
             )
             return signRequest
         case .cb:
-                    
+            
             guard let jsonRpc = request.toCbAction() else { return nil }
-                    
+            
             // Execute on main as Coinbase SDK is not dispatching on main when calling UIApplication.openUrl()
             DispatchQueue.main.async {
                 CoinbaseWalletSDK.shared.makeRequest(
@@ -260,7 +267,30 @@ public class Web3ModalClient {
             } else {
                 fatalError("TODO: Not implemented yet")
             }
-            
+        case .metamask:
+            if case let .personal_sign(address, message) = request {
+                let response: W3MResponse
+                let result = await MetaMaskSDK.sharedInstance!.personalSign(message: message, address: address)
+                switch result {
+                case .success(let signature):
+                    response = .init(result: .response(AnyCodable(signature)))
+                case .failure(let error):
+                    response = .init(result: .error(.init(code: error.code, message: error.message)))
+                }
+                self.metamaskResponseSubject.send(response)
+            } else if case let .eth_signTypedData_v4(address, message) = request {
+                let response: W3MResponse
+                let result = await MetaMaskSDK.sharedInstance!.signTypedDataV4(typedData: message, address: address)
+                switch result {
+                case .success(let signature):
+                    response = .init(result: .response(AnyCodable(signature)))
+                case .failure(let error):
+                    response = .init(result: .error(.init(code: error.code, message: error.message)))
+                }
+                self.metamaskResponseSubject.send(response)
+            } else {
+                fatalError("TODO: Not implemented yet")
+            }
             
         case .none:
             break
@@ -308,6 +338,14 @@ public class Web3ModalClient {
         case .phantom:
             do {
                 try await PhantomClient.shared?.disconnectWallet()
+                analyticsService.track(.DISCONNECT_SUCCESS)
+            } catch {
+                analyticsService.track(.DISCONNECT_ERROR)
+                throw error
+            }
+        case .metamask:
+            do {
+                try await MetaMaskSDK.sharedInstance?.disconnect()
                 analyticsService.track(.DISCONNECT_SUCCESS)
             } catch {
                 analyticsService.track(.DISCONNECT_ERROR)
@@ -393,10 +431,12 @@ public class Web3ModalClient {
     
     @discardableResult
     public func handleDeeplink(_ url: URL) -> Bool {
+        print("qqq handleDeeplink \(url.absoluteString)")
         if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let queryItems = components.queryItems,
            queryItems.contains(where: { $0.name == "wc_ev" }) {
             do {
+                print("qqq handle with WalletConnect SDK")
                 try signClient.dispatchEnvelope(url.absoluteString)
                 return true
             } catch {
@@ -406,12 +446,24 @@ public class Web3ModalClient {
         }
         do {
             if Phantom.canHandle(url: url) {
+                print("qqq handle with Phantom SDK")
                 try PhantomClient.shared?.processDeeplink(url: url)
                 return true
             }
             
+            if URLComponents(url: url, resolvingAgainstBaseURL: true)?.host == "mmsdk" {
+                print("qqq handle with MetaMask SDK")
+                if MetaMaskSDK.sharedInstance == nil {
+                    print("qqq Why is metamask nil?")
+                }
+                MetaMaskSDK.sharedInstance?.handleUrl(url)
+                return true
+            }
+            
+            print("qqq handle with Coinbase SDK")
             return try CoinbaseWalletSDK.shared.handleResponse(url)
         } catch {
+            print("qqq handleDeeplink error \(error)")
             store.toast = .init(style: .error, message: error.localizedDescription)
             return false
         }

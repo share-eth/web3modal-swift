@@ -152,6 +152,8 @@ final class NetworkDetailViewModel: ObservableObject {
             try await Web3Modal.instance.request(.wallet_switchEthereumChain(chainId: to.chainReference))
         case .phantom:
             fatalError("Not implement")
+        case .metamask:
+            fatalError("Not implement")
         case .none:
             break
         }
@@ -195,6 +197,8 @@ final class NetworkDetailViewModel: ObservableObject {
                      rpcUrls: addChainParams.rpcUrls
                  ))
         case .phantom:
+            fatalError("Not implement")
+        case .metamask:
             fatalError("Not implement")
         case .none:
             break

@@ -189,7 +189,7 @@ final class W3MAPIInteractor: ObservableObject {
         
         try await wallets.concurrentMap { wallet in
             
-            if wallet.id == "desktopWallet" {
+            if wallet.id == DesktopWallet_walletId {
                 return (wallet.id, UIImage(resource: .desktopWallet))
             }
             
