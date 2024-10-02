@@ -7,6 +7,12 @@ import phantom_swift
 import UIKit
 #endif
 
+public let DesktopWallet_walletId = "desktopWallet"
+public let MetaMask_walletId = "c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96"
+public let MetaMaskSDK_walletId = MetaMask_walletId + "1"
+public let Coinbase_walletId = "fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa"
+public let Phantom_walletId = "a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393"
+
 /// Web3Modal instance wrapper
 ///
 /// ```Swift
@@ -79,6 +85,7 @@ public class Web3Modal {
         let queryableWalletSchemes: [String]
         let customWallets: [Wallet]
         let coinbaseEnabled: Bool
+        let metamaskSDKEnabled: Bool
 
         let onError: (Error) -> Void
 
@@ -105,6 +112,7 @@ public class Web3Modal {
         queryableWalletSchemes: [String] = [],
         customWallets: [Wallet] = [],
         coinbaseEnabled: Bool = true,
+        metamaskSDKEnabled: Bool = true,
         onError: @escaping (Error) -> Void = { _ in }
     ) {
         Pair.configure(metadata: metadata)
@@ -121,6 +129,7 @@ public class Web3Modal {
             queryableWalletSchemes: queryableWalletSchemes,
             customWallets: customWallets,
             coinbaseEnabled: coinbaseEnabled,
+            metamaskSDKEnabled: metamaskSDKEnabled,
             onError: onError
         )
 
@@ -135,11 +144,21 @@ public class Web3Modal {
         store.queryableWalletSchemes = queryableWalletSchemes
         store.customWallets = customWallets
         
-        configureCoinbaseIfNeeded(
-            store: store,
-            metadata: metadata,
-            w3mApiInteractor: w3mApiInteractor
-        )
+        if metamaskSDKEnabled {
+            configureMetaMaskIfNeeded(
+                store: store,
+                metadata: metadata,
+                w3mApiInteractor: w3mApiInteractor
+            )
+        }
+        
+        if coinbaseEnabled {
+            configureCoinbaseIfNeeded(
+                store: store,
+                metadata: metadata,
+                w3mApiInteractor: w3mApiInteractor
+            )
+        }
         
         configurePhantomIfNeeded(
             store: store,
@@ -190,7 +209,7 @@ public class Web3Modal {
         }
             
         var wallet: Wallet = .init(
-            id: "fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa",
+            id: Coinbase_walletId,
             name: "Coinbase",
             homepage: "https://www.coinbase.com/wallet/",
             imageId: "a5ebc364-8f91-4200-fcc6-be81310a0000",
@@ -253,13 +272,11 @@ public class Web3Modal {
         sessionParams: SessionParams,
         w3mApiInteractor: W3MAPIInteractor
     ) {
-        guard let redirectLink = metadata.redirect?.universal ?? metadata.redirect?.native,
-            let keys = sessionParams.optionalNamespaces?.keys,
-            keys.contains("solana")
+        guard let redirectLink = metadata.redirect?.universal ?? metadata.redirect?.native
         else { return }
 
         let wallet: Wallet = .init(
-            id: "a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393",
+            id: Phantom_walletId,
             name: "Phantom",
             homepage: "https://phantom.app/",
             imageId: "c38443bb-b3c1-4697-e569-408de3fcc100",
