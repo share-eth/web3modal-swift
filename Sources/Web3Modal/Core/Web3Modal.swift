@@ -159,13 +159,15 @@ public class Web3Modal {
                 w3mApiInteractor: w3mApiInteractor
             )
         }
-        
-        configurePhantomIfNeeded(
-            store: store,
-            metadata: metadata,
-            sessionParams: sessionParams,
-            w3mApiInteractor: w3mApiInteractor
-        )
+
+        if sessionParams.optionalNamespaces?.keys.contains("solana") ?? false {
+            configurePhantomIfNeeded(
+                store: store,
+                metadata: metadata,
+                sessionParams: sessionParams,
+                w3mApiInteractor: w3mApiInteractor
+            )
+        }
         
         Web3Modal.viewModel = Web3ModalViewModel(
             router: router,
