@@ -431,12 +431,11 @@ public class Web3ModalClient {
     
     @discardableResult
     public func handleDeeplink(_ url: URL) -> Bool {
-        print("qqq handleDeeplink \(url.absoluteString)")
         if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let queryItems = components.queryItems,
            queryItems.contains(where: { $0.name == "wc_ev" }) {
             do {
-                print("qqq handle with WalletConnect SDK")
+                print("Handle deeplink with Wallet Connect")
                 try signClient.dispatchEnvelope(url.absoluteString)
                 return true
             } catch {
@@ -452,7 +451,7 @@ public class Web3ModalClient {
             }
             
             if URLComponents(url: url, resolvingAgainstBaseURL: true)?.host == "mmsdk" {
-                print("qqq handle with MetaMask SDK")
+                print("Handle deeplink with MetaMask SDK")
                 if MetaMaskSDK.sharedInstance == nil {
                     print("qqq Why is metamask nil?")
                 }
@@ -460,10 +459,10 @@ public class Web3ModalClient {
                 return true
             }
             
-            print("qqq handle with Coinbase SDK")
+            print("Handle deeplink with Coinbase SDK")
             return try CoinbaseWalletSDK.shared.handleResponse(url)
         } catch {
-            print("qqq handleDeeplink error \(error)")
+            print("Handle deeplink with error \(error)")
             store.toast = .init(style: .error, message: error.localizedDescription)
             return false
         }
